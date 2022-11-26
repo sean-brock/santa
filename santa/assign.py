@@ -1,7 +1,9 @@
-import argparse
 import random
 from typing import List
+import sys
 
+def eprint(*args, **kwargs):
+    print(*args, file=sys.stderr, **kwargs)
 
 def shuffle(list_in: list) -> list:
     shuff = []
@@ -14,34 +16,39 @@ def shuffle(list_in: list) -> list:
 
 def santa(names: List[str]):
     pairs = {}
-    success = False
-    iters = 0
 
-    def generate(pairs: dict) -> bool:
-        shuffled = shuffle(names)
-        for name in names:
-            count = 0
-            while name == shuffled[count]:
-                if len(shuffled) == 1:
-                    return False
-                count += 1
-                if count >= len(shuffled):
-                    count = 0
-            pairs[name] = shuffled.pop(count)
-        return True
-
-    done = False
-    while not done:
-        done = generate(pairs)
-        iters += 1
-    print(f"Solved in {iters} iterations.")
+    shuffled = shuffle(names)
+    for i in range(len(shuffled)):
+        j = i + 1 if i < len(shuffled) - 1 else 0
+        pairs[shuffled[i]] = shuffled[j]
     return pairs
 
 
 def validate(pairs: dict) -> bool:
+    keys = set()
+    vals = set()
     for x, y in pairs.items():
         if x == y:
+            eprint("Key value pair are the same item.")
             return False
+        keys.add(x)
+        vals.add(y)
+
+    # check duplicate key/val
+    expected_items = len(pairs)
+    if expected_items != len(keys):
+        eprint("Duplicate keys found in output.")
+        return False
+    if expected_items != len(vals):
+        eprint("Duplicate values found in output.")
+        return False
+
+    # Check vals not in keys
+    if vals != keys:
+        eprint("Unique values present not found in keys.")
+        return False
+
+
     return True
 
 
